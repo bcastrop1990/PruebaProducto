@@ -1,5 +1,6 @@
 package com.example.PruebaTecnica.model.request;
 
+import java.util.Date;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -8,8 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class ProductosRequest {
-    private String dni;
-    private String primerApellido;
-    private String segundoApellido;
-    private String preNombres;
+    private Long id;
+    private String nombre;
+    private Date fecRegistro;
 }

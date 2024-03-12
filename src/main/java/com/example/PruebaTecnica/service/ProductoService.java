@@ -1,12 +1,12 @@
 package com.example.PruebaTecnica.service;
 
-import com.example.PruebaTecnica.model.request.ProductosRequest;
-import com.example.PruebaTecnica.model.response.ApiResponse;
-import com.example.PruebaTecnica.model.response.ListaProductosResponse;
+import com.example.PruebaTecnica.model.Producto;
 
 import java.util.List;
 
 public interface ProductoService {
 
-    ApiResponse<ListaProductosResponse> obtenerPorId(ProductosRequest request);
+    List<Producto> agregarYListarProductos(Producto producto);
+
+
 }

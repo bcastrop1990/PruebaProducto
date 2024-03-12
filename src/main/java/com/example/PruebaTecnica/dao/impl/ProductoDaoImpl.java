@@ -2,6 +2,7 @@ package com.example.PruebaTecnica.dao.impl;
 
 import com.example.PruebaTecnica.dao.ProductosDao;
 import com.example.PruebaTecnica.dao.rowmapper.ProductoRowMapper;
+import com.example.PruebaTecnica.model.Producto;
 import com.example.PruebaTecnica.model.bean.ProductosBean;
 import com.example.PruebaTecnica.model.request.ProductosRequest;
 import lombok.AllArgsConstructor;
@@ -11,12 +12,11 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.sql.Types;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 @Repository
 @AllArgsConstructor
@@ -24,22 +24,29 @@ public class ProductoDaoImpl implements ProductosDao {
   private JdbcTemplate jdbcTemplate;
 
   @Override
-  public List<ProductosBean> consultar(ProductosRequest request) {
+  public List<ProductosBean> agregarYListar(Producto request) {
+    // Configurando SimpleJdbcCall
     SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate)
-            .withCatalogName("IDO_PLATAFORMA_EXPE")
-            .withProcedureName("SP_EJEMPLO")
-            .withoutProcedureColumnMetaDataAccess()
-            .declareParameters(
-                    new SqlParameter("P_VID", Types.VARCHAR),
-                    new SqlParameter("P_VNOMBRE", Types.VARCHAR),
-                    new SqlParameter("P_VFEC_REGISTRO", Types.VARCHAR),
-                    new SqlOutParameter("C_CRRESULT", Types.REF_CURSOR,
-                            new ProductoRowMapper()));
-    SqlParameterSource prm = new MapSqlParameterSource()
-            .addValue("P_VDNI", request.getDni());
-    Map<String, Object> result = simpleJdbcCall.execute(prm);
-    List<ProductosBean> beanList = (List) result.get("C_CRRESULT");
-    return beanList;
-  }
+        .withCatalogName("prueba_tecnica") // Asegúrate de que el nombre del catálogo es correcto
+        .withProcedureName("sp_insertar_producto_y_listar_del_dia")
+        .declareParameters(
+            new SqlParameter("p_id", Types.VARCHAR),
+            new SqlParameter("p_nombre", Types.VARCHAR),
+            new SqlParameter("p_fec_registro", Types.DATE),
+            new SqlOutParameter("p_cursor", Types.REF_CURSOR, new ProductoRowMapper()))
+        .withoutProcedureColumnMetaDataAccess();
 
+    // Creando el objeto de parámetros para el procedimiento almacenado
+    SqlParameterSource inParams = new MapSqlParameterSource()
+        .addValue("p_id", request.getId())
+        .addValue("p_nombre", request.getNombre())
+        .addValue("p_fec_registro", request.getFecRegistro());
+
+    // Ejecutando el procedimiento almacenado
+    Map<String, Object> result = simpleJdbcCall.execute(inParams);
+
+    // Obteniendo la lista de productos del cursor
+    List<ProductosBean> productosList = (List<ProductosBean>) result.get("p_cursor");
+    return productosList;
+  }
 }
